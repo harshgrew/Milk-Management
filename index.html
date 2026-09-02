@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🥛 Milk Management</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -2px rgba(0,0,0,0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+            --radius: 16px;
+            --radius-sm: 12px;
+            --rupee-color: #13c755;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ========== CUSTOMER COLOR THEMES ========== */
+        .theme-dhanphul { --cust-primary: #3b82f6; --cust-light: #dbeafe; --cust-dark: #1d4ed8; }
+        .theme-rajkapur { --cust-primary: #8b5cf6; --cust-light: #ede9fe; --cust-dark: #5b21b6; }
+        .theme-manpal   { --cust-primary: #f97316; --cust-light: #ffedd5; --cust-dark: #c2410c; }
+        .theme-dharmbir { --cust-primary: #e11d48; --cust-light: #ffe4e6; --cust-dark: #9f1239; }
+        .theme-mani     { --cust-primary: #14b8a6; --cust-light: #ccfbf1; --cust-dark: #0f766e; }
+        .theme-rakesh   { --cust-primary: #6366f1; --cust-light: #e0e7ff; --cust-dark: #3730a3; }
+
+        /* ========== SHARED BACKGROUND ========== */
+        .page-bg::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 100vh;
+            background: url('https://t4.ftcdn.net/jpg/01/45/60/21/360_F_145602173_05uVexifBuCvWIKvsHGWNuIpPtp5ShkI.jpg') center/cover no-repeat;
+            opacity: 0.8;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ========== DASHBOARD ========== */
+        .dashboard {
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 0 16px 40px;
+            position: relative;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+            color: white;
+            padding: 36px 20px 48px;
+            text-align: center;
+            border-radius: 0 0 var(--radius) var(--radius);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(16,185,129,0.3);
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            right: -15%;
+            width: 220px;
+            height: 220px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -25%;
+            left: -8%;
+            width: 160px;
+            height: 160px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+        }
+
+        .header h1 {
+            font-size: 1.7rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 6px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 10px;
+            margin-top: -28px;
+            position: relative;
+            z-index: 2;
+            padding: 0 2px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 16px 8px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card .value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #10b981;
+        }
+
+        .stat-card .label {
+            font-size: 0.65rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .customer-list {
+            margin-top: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .customer-card {
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 18px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            border-left: 5px solid var(--cust-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .customer-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 80px; height: 80px;
+            background: var(--cust-light);
+            border-radius: 0 0 0 80px;
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .customer-card:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 12px 24px -4px rgba(0,0,0,0.1);
+            border-color: var(--cust-light);
+        }
+
+        .customer-card:hover::before {
+            width: 120px; height: 120px;
+            opacity: 0.7;
+        }
+
+        .customer-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--cust-light), var(--cust-primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .customer-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .customer-meta {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .amount-section {
+            text-align: right;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .amount {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--rupee-color);
+            text-shadow: 0 0 20px rgba(134,239,172,0.3);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-detail {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--cust-primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-detail:hover {
+            background: var(--cust-dark);
+            transform: scale(1.08);
+        }
+
+        .btn-pay {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+
+        .btn-pay:hover {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            transform: scale(1.08);
+        }
+
+        /* ========== PAYMENT MODAL ========== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-content {
+            background: var(--card);
+            width: 100%;
+            max-width: 520px;
+            max-height: 85vh;
+            border-radius: var(--radius) var(--radius) 0 0;
+            padding: 24px 20px 32px;
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg);
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: #fee2e2;
+            color: #dc2626;
+            transform: rotate(90deg);
+        }
+
+        .payment-balance {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #a7f3d0;
+        }
+
+        .payment-balance .label {
+            font-size: 0.75rem;
+            color: #065f46;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-balance .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #047857;
+            margin-top: 4px;
+        }
+
+        .payment-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .payment-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+
+        .payment-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+        }
+
+        .btn-add-payment {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--radius-sm);
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-add-payment:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+
+        .payment-history {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .payment-history-title {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .payment-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+
+        .payment-item:hover {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .payment-item .date {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .payment-item .amount {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #047857;
+        }
+
+        .empty-payments {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* ========== DETAIL PAGE ========== */
+        .detail-page {
+            display: none;
+            max-width: 520px;
+            margin: 0 auto;
+            padding: 0 16px 40px;
+            animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .detail-header {
+            background: linear-gradient(135deg, var(--cust-primary) 0%, var(--cust-dark) 100%);
+            color: white;
+            padding: 22px 20px;
+            border-radius: 0 0 var(--radius) var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .detail-header::after {
+            content: '';
+            position: absolute;
+            top: -30%;
+            right: -10%;
+            width: 180px;
+            height: 180px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 50%;
+        }
+
+        .btn-back {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            backdrop-filter: blur(8px);
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.35);
+            transform: scale(1.1) rotate(-4deg);
+        }
+
+        .btn-back svg { width: 20px; height: 20px; }
+
+        .detail-title h2 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detail-title p {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            margin-top: 3px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detail-total {
+            margin-left: auto;
+            text-align: right;
+            position: relative;
+            z-index: 1;
+        }
+
+        .detail-total .value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--rupee-color);
+            text-shadow: 0 0 20px rgba(134,239,172,0.3);
+        }
+
+        .detail-total .label {
+            font-size: 0.7rem;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-list {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .day-card {
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 18px 20px;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .day-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px; height: 100%;
+            background: linear-gradient(180deg, var(--cust-primary), var(--cust-dark));
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .day-card:hover {
+            border-color: var(--cust-light);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transform: translateY(-1px);
+        }
+
+        .day-card:hover::before {
+            opacity: 1;
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            padding-bottom: 12px;
+            border-bottom: 1.5px dashed var(--border);
+        }
+
+        .day-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .day-amount {
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--rupee-color);
+            background: rgba(134,239,172,0.12);
+            padding: 5px 14px;
+            border-radius: 20px;
+            text-shadow: 0 0 10px rgba(134,239,172,0.2);
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .slot {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slot-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slot-label .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .slot-label.morning .dot { background: #f59e0b; box-shadow: 0 0 8px rgba(245,158,11,0.4); }
+        .slot-label.evening .dot { background: #6366f1; box-shadow: 0 0 8px rgba(99,102,241,0.4); }
+
+        .slot-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            width: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        .slot-select:hover {
+            border-color: var(--cust-primary);
+            background: linear-gradient(135deg, #ffffff, var(--cust-light));
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
+        .slot-select:focus {
+            outline: none;
+            border-color: var(--cust-primary);
+            box-shadow: 0 0 0 4px var(--cust-light), 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .slot-select option {
+            font-weight: 600;
+            padding: 10px;
+            font-size: 0.95rem;
+            background: white;
+            color: var(--text);
+        }
+
+        .today-highlight {
+            border: 2px solid var(--cust-primary) !important;
+            background: linear-gradient(135deg, #ffffff 0%, var(--cust-light) 100%) !important;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+        }
+
+        .today-highlight::before {
+            opacity: 1 !important;
+        }
+
+        .today-badge {
+            font-size: 0.62rem;
+            background: var(--cust-primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 12px;
+            margin-left: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Responsive */
+        @media (max-width: 400px) {
+            .header h1 { font-size: 1.4rem; }
+            .amount { font-size: 1.15rem; }
+            .customer-card { padding: 16px; }
+            .avatar { width: 46px; height: 46px; font-size: 0.95rem; }
+            .slots-grid { gap: 12px; }
+            .stats-bar { gap: 8px; }
+            .stat-card { padding: 14px 6px; }
+            .stat-card .value { font-size: 1.1rem; }
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- ========== DASHBOARD ========== -->
+<div id="dashboard" class="dashboard page-bg">
+    <div class="header">
+        <h1>🥛 Milk Management</h1>
+        <p>Fresh milk, happy customers</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat-card">
+            <div class="value" id="totalCustomers">6</div>
+            <div class="label">Customers</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalRevenue">₹0</div>
+            <div class="label">Total Bill</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="totalPaid">₹0</div>
+            <div class="label">Paid Yet</div>
+        </div>
+    </div>
+
+    <div class="customer-list" id="customerList"></div>
+</div>
+
+<!-- ========== DETAIL PAGE ========== -->
+<div id="detailPage" class="detail-page page-bg">
+    <div class="detail-header" id="detailHeader">
+        <button class="btn-back" onclick="showDashboard()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/>
+            </svg>
+        </button>
+        <div class="detail-title">
+            <h2 id="detailCustomerName">Customer</h2>
+            <p id="detailMonthInfo">September 2026</p>
+        </div>
+        <div class="detail-total">
+            <div class="value" id="detailTotalAmount">₹0</div>
+            <div class="label">Total</div>
+        </div>
+    </div>
+
+    <div class="calendar-list" id="calendarList"></div>
+</div>
+
+<!-- ========== PAYMENT MODAL ========== -->
+<div id="paymentModal" class="modal-overlay" onclick="closePaymentModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>💰 Payment History</h3>
+            <button class="modal-close" onclick="closePaymentModal()">×</button>
+        </div>
+        <div class="payment-balance">
+            <div class="label">Remaining Balance</div>
+            <div class="value" id="modalBalance">₹0</div>
+        </div>
+        <div class="payment-form">
+            <input type="number" class="payment-input" id="paymentAmount" placeholder="Enter amount (₹)" min="1">
+            <button class="btn-add-payment" onclick="addPayment()">Add Payment</button>
+        </div>
+        <div class="payment-history-title">Payment History</div>
+        <div class="payment-history" id="paymentHistory"></div>
+    </div>
+</div>
+
+<script>
+    const PRICE_PER_KG = 70;
+    const CUSTOMERS = ['Dhanphul', 'Rajkapur', 'Manpal', 'Dharmbir', 'Mani', 'Rakesh'];
+    const KG_OPTIONS = [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5];
+    const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const CURRENT_YEAR = 2026;
+    const CURRENT_MONTH = 8; // September (0-indexed)
+
+    const CUSTOMER_COLORS = {
+        'Dhanphul': { primary: '#3b82f6', light: '#dbeafe', dark: '#1d4ed8' },
+        'Rajkapur': { primary: '#8b5cf6', light: '#ede9fe', dark: '#5b21b6' },
+        'Manpal':   { primary: '#f97316', light: '#ffedd5', dark: '#c2410c' },
+        'Dharmbir': { primary: '#e11d48', light: '#ffe4e6', dark: '#9f1239' },
+        'Mani':     { primary: '#14b8a6', light: '#ccfbf1', dark: '#0f766e' },
+        'Rakesh':   { primary: '#6366f1', light: '#e0e7ff', dark: '#3730a3' }
+    };
+
+    // ========== DATA ==========
+    function loadData() {
+        try {
+            const raw = localStorage.getItem('milkData_v4');
+            if (raw) return JSON.parse(raw);
+        } catch(e) {}
+        return {};
+    }
+
+    function saveData(data) {
+        localStorage.setItem('milkData_v4', JSON.stringify(data));
+    }
+
+    let data = loadData();
+
+    // Migrate old data
+    function migrateData() {
+        // v3 migration
+        try {
+            const rawV3 = localStorage.getItem('milkData_v3');
+            if (rawV3) {
+                const v3 = JSON.parse(rawV3);
+                Object.keys(v3).forEach(key => {
+                    if (!data[key]) {
+                        data[key] = v3[key];
+                    }
+                });
+            }
+        } catch(e) {}
+        // v2 migration
+        try {
+            const rawV2 = localStorage.getItem('milkData_v2');
+            if (rawV2) {
+                const v2 = JSON.parse(rawV2);
+                if (v2['Dhanpaal'] && !data['Dhanphul']) data['Dhanphul'] = v2['Dhanpaal'];
+                if (v2['Maanni'] && !data['Mani']) data['Mani'] = v2['Maanni'];
+                CUSTOMERS.forEach(c => {
+                    if (v2[c] && !data[c]) data[c] = v2[c];
+                });
+            }
+        } catch(e) {}
+        saveData(data);
+    }
+    migrateData();
+
+    // Ensure structure
+    CUSTOMERS.forEach(c => {
+        if (!data[c]) data[c] = {};
+        if (!data[c].payments) data[c].payments = [];
+    });
+    saveData(data);
+
+    // ========== HELPERS ==========
+    function calculateCustomerTotal(customer) {
+        let total = 0;
+        const custData = data[customer] || {};
+        Object.keys(custData).forEach(key => {
+            if (key === 'payments') return;
+            const day = custData[key];
+            total += (day.morning || 0) * PRICE_PER_KG;
+            total += (day.evening || 0) * PRICE_PER_KG;
+        });
+        return total;
+    }
+
+    function calculateCustomerPaid(customer) {
+        const payments = data[customer]?.payments || [];
+        return payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+    }
+
+    function calculateGrandTotal() {
+        return CUSTOMERS.reduce((sum, c) => sum + calculateCustomerTotal(c), 0);
+    }
+
+    function calculateGrandPaid() {
+        return CUSTOMERS.reduce((sum, c) => sum + calculateCustomerPaid(c), 0);
+    }
+
+    function getInitials(name) {
+        return name.substring(0, 2).toUpperCase();
+    }
+
+    function formatCurrency(amount) {
+        return '₹' + Math.round(amount).toLocaleString('en-IN');
+    }
+
+    function formatDate(dateStr) {
+        const d = new Date(dateStr);
+        return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function getThemeClass(name) {
+        return 'theme-' + name.toLowerCase();
+    }
+
+    // ========== DASHBOARD ==========
+    function renderDashboard() {
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('detailPage').style.display = 'none';
+        document.getElementById('totalCustomers').textContent = CUSTOMERS.length;
+        document.getElementById('totalRevenue').textContent = formatCurrency(calculateGrandTotal());
+        document.getElementById('totalPaid').textContent = formatCurrency(calculateGrandPaid());
+
+        const list = document.getElementById('customerList');
+        list.innerHTML = '';
+
+        CUSTOMERS.forEach((customer, index) => {
+            const total = calculateCustomerTotal(customer);
+            const paid = calculateCustomerPaid(customer);
+            const balance = total - paid;
+            const card = document.createElement('div');
+            card.className = 'customer-card ' + getThemeClass(customer);
+            card.innerHTML = `
+                <div class="customer-info">
+                    <div class="avatar">${getInitials(customer)}</div>
+                    <div>
+                        <div class="customer-name">${customer}</div>
+                        <div class="customer-meta">Balance: ${formatCurrency(balance)}</div>
+                    </div>
+                </div>
+                <div class="amount-section">
+                    <div class="amount">${formatCurrency(total)}</div>
+                    <div class="btn-row">
+                        <button class="btn-pay" onclick="openPaymentModal('${customer}')">Pay</button>
+                        <button class="btn-detail" onclick="showDetail('${customer}')">Detail</button>
+                    </div>
+                </div>
+            `;
+            list.appendChild(card);
+        });
+    }
+
+    // ========== PAYMENT MODAL ==========
+    let currentPaymentCustomer = '';
+
+    function openPaymentModal(customer) {
+        currentPaymentCustomer = customer;
+        const modal = document.getElementById('paymentModal');
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        renderPaymentModal();
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentAmount').focus();
+    }
+
+    function closePaymentModal(event) {
+        if (event && event.target !== event.currentTarget) return;
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+        currentPaymentCustomer = '';
+    }
+
+    function renderPaymentModal() {
+        const customer = currentPaymentCustomer;
+        const total = calculateCustomerTotal(customer);
+        const paid = calculateCustomerPaid(customer);
+        const balance = total - paid;
+
+        document.getElementById('modalBalance').textContent = formatCurrency(balance);
+
+        const historyEl = document.getElementById('paymentHistory');
+        const payments = data[customer]?.payments || [];
+
+        if (payments.length === 0) {
+            historyEl.innerHTML = '<div class="empty-payments">No payments recorded yet.</div>';
+            return;
+        }
+
+        // Sort by date descending
+        const sorted = [...payments].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        historyEl.innerHTML = sorted.map(p => `
+            <div class="payment-item">
+                <span class="date">${formatDate(p.date)}</span>
+                <span class="amount">${formatCurrency(p.amount)}</span>
+            </div>
+        `).join('');
+    }
+
+    function addPayment() {
+        const input = document.getElementById('paymentAmount');
+        const amount = parseFloat(input.value);
+        if (!amount || amount <= 0) {
+            input.style.borderColor = '#ef4444';
+            setTimeout(() => input.style.borderColor = '', 1000);
+            return;
+        }
+
+        if (!data[currentPaymentCustomer].payments) {
+            data[currentPaymentCustomer].payments = [];
+        }
+
+        data[currentPaymentCustomer].payments.push({
+            amount: amount,
+            date: new Date().toISOString().split('T')[0]
+        });
+
+        saveData(data);
+        input.value = '';
+        renderPaymentModal();
+        renderDashboard();
+    }
+
+    // Allow Enter key to add payment
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && document.getElementById('paymentModal').classList.contains('active')) {
+            addPayment();
+        }
+        if (e.key === 'Escape' && document.getElementById('paymentModal').classList.contains('active')) {
+            closePaymentModal();
+        }
+    });
+
+    // ========== DETAIL PAGE ==========
+    let currentCustomer = '';
+
+    function showDetail(customer) {
+        currentCustomer = customer;
+        document.getElementById('dashboard').style.display = 'none';
+        document.getElementById('detailPage').style.display = 'block';
+        document.getElementById('detailPage').style.animation = 'none';
+        document.getElementById('detailPage').offsetHeight;
+        document.getElementById('detailPage').style.animation = 'slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
+
+        const detailPage = document.getElementById('detailPage');
+        detailPage.className = 'detail-page page-bg ' + getThemeClass(customer);
+
+        renderDetail();
+    }
+
+    function showDashboard() {
+        renderDashboard();
+    }
+
+    function renderDetail() {
+        const year = CURRENT_YEAR;
+        const month = CURRENT_MONTH;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const today = new Date();
+        const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month;
+        const todayDate = today.getDate();
+
+        document.getElementById('detailCustomerName').textContent = currentCustomer;
+        document.getElementById('detailMonthInfo').textContent = `${MONTH_NAMES[month]} ${year}`;
+        document.getElementById('detailTotalAmount').textContent = formatCurrency(calculateCustomerTotal(currentCustomer));
+
+        const list = document.getElementById('calendarList');
+        list.innerHTML = '';
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayData = data[currentCustomer]?.[dateKey] || { morning: 0, evening: 0 };
+            const dayTotal = (dayData.morning || 0) * PRICE_PER_KG + (dayData.evening || 0) * PRICE_PER_KG;
+            const isToday = isCurrentMonth && day === todayDate;
+
+            const dayCard = document.createElement('div');
+            dayCard.className = 'day-card' + (isToday ? ' today-highlight' : '');
+
+            const morningOptions = KG_OPTIONS.map(kg =>
+                `<option value="${kg}" ${dayData.morning == kg ? 'selected' : ''}>${kg} kg</option>`
+            ).join('');
+
+            const eveningOptions = KG_OPTIONS.map(kg =>
+                `<option value="${kg}" ${dayData.evening == kg ? 'selected' : ''}>${kg} kg</option>`
+            ).join('');
+
+            dayCard.innerHTML = `
+                <div class="day-header">
+                    <div class="day-name">
+                        ${MONTH_NAMES[month]} ${day}
+                        ${isToday ? '<span class="today-badge">TODAY</span>' : ''}
+                    </div>
+                    <div class="day-amount">${formatCurrency(dayTotal)}</div>
+                </div>
+                <div class="slots-grid">
+                    <div class="slot">
+                        <div class="slot-label morning">
+                            <span class="dot"></span> Morning
+                        </div>
+                        <select class="slot-select" onchange="updateQuantity('${dateKey}', 'morning', this.value)">
+                            ${morningOptions}
+                        </select>
+                    </div>
+                    <div class="slot">
+                        <div class="slot-label evening">
+                            <span class="dot"></span> Evening
+                        </div>
+                        <select class="slot-select" onchange="updateQuantity('${dateKey}', 'evening', this.value)">
+                            ${eveningOptions}
+                        </select>
+                    </div>
+                </div>
+            `;
+
+            list.appendChild(dayCard);
+        }
+    }
+
+    function updateQuantity(dateKey, slot, value) {
+        if (!data[currentCustomer]) data[currentCustomer] = {};
+        if (!data[currentCustomer][dateKey]) data[currentCustomer][dateKey] = { morning: 0, evening: 0 };
+        data[currentCustomer][dateKey][slot] = parseFloat(value);
+        saveData(data);
+
+        document.getElementById('detailTotalAmount').textContent = formatCurrency(calculateCustomerTotal(currentCustomer));
+
+        const dayData = data[currentCustomer][dateKey];
+        const dayTotal = (dayData.morning || 0) * PRICE_PER_KG + (dayData.evening || 0) * PRICE_PER_KG;
+
+        const dayCards = document.querySelectorAll('.day-card');
+        const dayNum = parseInt(dateKey.split('-')[2]);
+        if (dayCards[dayNum - 1]) {
+            const amountEl = dayCards[dayNum - 1].querySelector('.day-amount');
+            if (amountEl) amountEl.textContent = formatCurrency(dayTotal);
+        }
+    }
+
+    // ========== INIT ==========
+    renderDashboard();
+</script>
+
+</body>
+</html>
